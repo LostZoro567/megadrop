@@ -84,7 +84,7 @@ async def on_preview(call: CallbackQuery, bot: Bot):
     b = InlineKeyboardBuilder()
     for code, lang in C.LANGUAGES.items():
         b.button(text=lang["name"], callback_data=f"lang:{code}")
-    b.adjust(2)
+    b.adjust(1)
     await bot.send_message(call.from_user.id, C.CHOOSE_LANG_TEXT, reply_markup=b.as_markup())
 
 
