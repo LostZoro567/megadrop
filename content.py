@@ -26,9 +26,9 @@ CHOOSE_LANG_TEXT = "🌐 <b>Choose your language</b>\n<b>अपनी भाष�
 # 3-4 images sent as an album after a language is picked.
 # Local paths or https URLs. Missing files are skipped.
 PREVIEW_IMAGES = [
-    "assets/preview1.jpg",
-    "assets/preview2.jpg",
-    "assets/preview3.jpg",
+    "https://graph.org/file/d9a2dd1794955feefe5be-fb3ade56cb0cea1359.jpg",
+    "https://graph.org/file/f94d27c32a9be80a0c2d1-e4dfb46130efa05dae.jpg",
+    "https://graph.org/file/b463c1204896f04b1a1b0-5774962d984ae35e62.jpg",
 ]
 
 # Where the button under the preview leads
