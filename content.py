@@ -11,7 +11,7 @@ WELCOME_TEXT_1 = (
 )
 
 # Message 3: text + buttons
-WELCOME_TEXT_2 = "👇 <b>Join us on our channels:</b>"
+WELCOME_TEXT_2 = "👇 <b>Press preview to have a sneak peak:</b>"
 WELCOME_BUTTONS = [
     ("📢 Join Us", "https://t.me/+ngKKWcsK5agwNDQ1"),
 ]
