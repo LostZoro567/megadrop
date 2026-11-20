@@ -16,6 +16,9 @@ import broadcast as bc
 from config import ADMIN_IDS, BOT_TOKEN
 from content import WELCOME_BUTTONS, WELCOME_IMAGE, WELCOME_TEXT_1, WELCOME_TEXT_2
 from db import DB
+from features import admin_router as support_admin_router
+from features import router as features_router
+from features import start_keyboard
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("bot")
@@ -60,13 +63,14 @@ async def send_welcome_image(bot: Bot, chat_id: int):
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, bot: Bot, db: DB):
+async def cmd_start(message: Message, bot: Bot, db: DB, state: FSMContext):
+    await state.clear()
     spawn(db.upsert_user(message.from_user))  # save user in background
     chat_id = message.chat.id
     await send_welcome_image(bot, chat_id)           # 1) image
     await message.answer(WELCOME_TEXT_1)             # 2) text
     await message.answer(                            # 3) text + buttons
-        WELCOME_TEXT_2, reply_markup=bc.build_kb(WELCOME_BUTTONS)
+        WELCOME_TEXT_2, reply_markup=start_keyboard()
     )
 
 
@@ -219,6 +223,8 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage(), db=db)
     dp.include_router(admin)
     dp.include_router(router)
+    dp.include_router(support_admin_router)
+    dp.include_router(features_router)
     await bot.delete_webhook()
     log.info("Bot started")
     try:
