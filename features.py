@@ -16,7 +16,6 @@ from aiogram.types import (
     CallbackQuery,
     FSInputFile,
     InlineKeyboardMarkup,
-    InputMediaPhoto,
     Message,
     ReactionTypeEmoji,
 )
@@ -51,37 +50,31 @@ def start_keyboard() -> InlineKeyboardMarkup:
 
 
 # ───────────────── Preview flow ─────────────────
-_cache: list[str] | None = None  # Telegram file_ids -> instant after first send
+BUTTON_ON_EVERY_IMAGE = True   # False = button only under the last image
+
+_cache: dict[str, str] = {}  # image path/url -> Telegram file_id (instant after 1st send)
 
 
-def _sources():
-    out = []
-    for p in C.PREVIEW_IMAGES:
-        if p.startswith(("http://", "https://")):
-            out.append(p)
-        elif os.path.isfile(p):
-            out.append(FSInputFile(p))
-        else:
-            log.warning("preview image missing: %s", p)
-    return out
-
-
-async def send_preview_images(bot: Bot, chat_id: int):
-    global _cache
-    try:
-        srcs = _cache or _sources()
-        if not srcs:
-            return
-        if len(srcs) == 1:
-            msgs = [await bot.send_photo(chat_id, srcs[0])]
-        else:
-            msgs = await bot.send_media_group(
-                chat_id, [InputMediaPhoto(media=s) for s in srcs[:10]]
-            )
-        if _cache is None:
-            _cache = [m.photo[-1].file_id for m in msgs]
-    except Exception as e:
-        log.error("preview images failed: %s", e)
+async def send_preview_images(bot: Bot, chat_id: int, kb: InlineKeyboardMarkup):
+    """Send the images one by one (no album), each with the button."""
+    images = C.PREVIEW_IMAGES
+    for i, path in enumerate(images):
+        src = _cache.get(path)
+        if src is None:
+            if path.startswith(("http://", "https://")):
+                src = path
+            elif os.path.isfile(path):
+                src = FSInputFile(path)
+            else:
+                log.warning("preview image missing: %s", path)
+                continue
+        markup = kb if (BUTTON_ON_EVERY_IMAGE or i == len(images) - 1) else None
+        try:
+            m = await bot.send_photo(chat_id, src, reply_markup=markup)
+            if path not in _cache and m.photo:
+                _cache[path] = m.photo[-1].file_id
+        except Exception as e:
+            log.error("preview image %s failed: %s", path, e)
 
 
 @router.callback_query(F.data == "preview")
@@ -100,10 +93,10 @@ async def on_language(call: CallbackQuery, bot: Bot):
     code = call.data.split(":", 1)[1]
     lang = C.LANGUAGES.get(code) or next(iter(C.LANGUAGES.values()))
     chat_id = call.from_user.id
-    await send_preview_images(bot, chat_id)
     b = InlineKeyboardBuilder()
     b.button(text=lang["button"], url=C.PREVIEW_LINK)
-    await bot.send_message(chat_id, lang["text"], reply_markup=b.as_markup())
+    await bot.send_message(chat_id, lang["text"])                 # intro text
+    await send_preview_images(bot, chat_id, b.as_markup())        # images one by one
 
 
 # ───────────────── Support: user -> admin ─────────────────
