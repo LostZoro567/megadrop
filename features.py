@@ -46,7 +46,7 @@ def start_keyboard() -> InlineKeyboardMarkup:
     b.button(text=C.SUPPORT_BTN, callback_data="support")
     for label, url in C.WELCOME_BUTTONS:
         b.button(text=label, url=url)
-    b.adjust(2, 1)   # first row: 2 buttons, every remaining button on its own row
+    b.adjust(1)   # every button on its own row
     return b.as_markup()
 
 
