@@ -40,12 +40,13 @@ def spawn(coro):
 
 # ───────────────── /start keyboard ─────────────────
 def start_keyboard() -> InlineKeyboardMarkup:
+    """Row 1: Preview | Support.  Below: all the link buttons together."""
     b = InlineKeyboardBuilder()
-    b.button(text=C.PREVIEW_BTN, callback_data="preview")      # top
+    b.button(text=C.PREVIEW_BTN, callback_data="preview")
+    b.button(text=C.SUPPORT_BTN, callback_data="support")
     for label, url in C.WELCOME_BUTTONS:
         b.button(text=label, url=url)
-    b.button(text=C.SUPPORT_BTN, callback_data="support")      # bottom
-    b.adjust(1)
+    b.adjust(2, 1)   # first row: 2 buttons, every remaining button on its own row
     return b.as_markup()
 
 
